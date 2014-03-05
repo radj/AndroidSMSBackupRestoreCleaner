@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<?xml-stylesheet type="text/xsl" href="sms.xsl"?>
+<smses count="2">
+  <sms protocol="0" address="09001234567" date="1365481757533" type="2" subject="null" body="Hey! :) What you doing?" toa="null" sc_toa="null" service_center="null" read="1" status="32" locked="0" date_sent="0" readable_date="2013/04/09 12:29:17" contact_name="Cute Chic" />
+  <sms protocol="0" address="09001234567" date="1365481757533" type="2" subject="null" body="Hey! :) What you doing?" toa="null" sc_toa="null" service_center="null" read="1" status="32" locked="0" date_sent="0" readable_date="2013/04/09 12:29:17" contact_name="Cute Chic" />
+</smses>
