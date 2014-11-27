@@ -12,8 +12,8 @@ Usage
 
 Need to have Python installed and all the files in one folder.
 
-`cd path/to/folder/`
-`python clean.py`
+* `cd path/to/folder/`
+* `python clean.py`
 
 Current limitations
 ===================
