@@ -22,9 +22,13 @@ log.debug("Done.")
 log.debug("Loading data into DB...")
 conn.execute('DELETE FROM messages')
 num_skipped = 0
+
+mms_list = []
+
 for child in root:
 	if child.tag == "mms":
 		log.debug("Skipping MMS element %s" % str(child))
+		mms_list.append(child)
 		num_skipped += 1
 		continue
 
@@ -46,6 +50,7 @@ for child in root:
 		num_skipped += 1
 		pass
 
+root.clear() # Clear this super huge tree. We don't need it anymore
 log.debug("Done. Skipped entries: " + str(num_skipped))
 conn.commit()
 
@@ -84,8 +89,13 @@ for row in cursor:
 	smsElement.set("readable_date", row[13])
 	smsElement.set("contact_name", row[14])
 
+# Append MMSes
+log.debug("Adding skipped %d MMS into new XML..." % len(mms_list))
+for mms in mms_list:
+	newroot.append(mms)
+
 newtree = XML.ElementTree(newroot)
-newtree.write("sms-new.xml")
+newtree.write("sms-new.xml", xml_declaration=True, encoding="UTF-8")
 time_end = datetime.now()
 log.debug('Operation completed in %d seconds.' % ((time_end - time_start).total_seconds()))
 
