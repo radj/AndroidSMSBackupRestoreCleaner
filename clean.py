@@ -1,5 +1,8 @@
 import sqlite3
-import xml.etree.ElementTree as XML
+try:
+    import xml.etree.cElementTree as XML
+except ImportError:
+    import xml.etree.ElementTree as XML
 import logging as log
 from datetime import datetime
 
