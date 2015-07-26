@@ -17,5 +17,6 @@ Need to have Python installed and all the files in one folder.
 
 Current limitations
 ===================
+* Python 2 only. (For now?)
 * No emoji support
 * No MMS duplicate filtering. It just maintains the MMS entries as is.
