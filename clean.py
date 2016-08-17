@@ -1,7 +1,6 @@
 import sqlite3
 try:
     from lxml.etree import ETCompatXMLParser
-
     custom_parser = ETCompatXMLParser(huge_tree=True, recover=True)
 except ImportError:
     custom_parser = None
@@ -16,7 +15,7 @@ import argparse
 import glob, fnmatch, os
 
 
-def main(xml_filenames, output_filename):
+def main(input_paths, output_path):
     try:
         time_start = datetime.now()
         log.basicConfig(level=log.DEBUG, format='%(asctime)s %(message)s')
@@ -26,7 +25,7 @@ def main(xml_filenames, output_filename):
         mms_list = []
         root = XML.Element("smses")
 
-        for xml_filename in xml_filenames:
+        for xml_filename in input_paths:
             log.debug("Parsing XML file: ")
             tree = XML.parse(xml_filename, parser=custom_parser)
             log.debug("Done.")
@@ -35,7 +34,7 @@ def main(xml_filenames, output_filename):
         add_sms(conn, root)
         conn.close()
         append_mms(mms_list, root)
-        write_file(output_filename, root)
+        write_file(output_path, root)
         time_end = datetime.now()
         log.debug('Operation completed in %d seconds.' % ((time_end - time_start).total_seconds()))
     finally:
@@ -43,9 +42,9 @@ def main(xml_filenames, output_filename):
             conn.close()
 
 
-def write_file(output_filename, root):
+def write_file(output_path, root):
     tree = XML.ElementTree(root)
-    tree.write(output_filename, xml_declaration=True, encoding="UTF-8")
+    tree.write(output_path, xml_declaration=True, encoding="UTF-8")
 
 
 def append_mms(mms_list, root):
@@ -127,24 +126,22 @@ def parse_args():
 
     args = parser.parse_args()
 
-    input_files = []
+    input_path = set()
 
     for current_path in args.input:
         temp_path = os.path.abspath(os.path.expandvars(os.path.expanduser(current_path)))
-        unfiltered_list1 = glob.glob(temp_path)
 
-        try:
-            unfiltered_list2 = [os.path.normpath(os.path.join(temp_path, x)) for x in os.listdir(temp_path)]
-        except OSError:
-            unfiltered_list2 = []
+        if os.path.isdir(temp_path):
+            unfiltered_list = [os.path.normpath(os.path.join(temp_path, x)) for x in os.listdir(temp_path)]
+        else:
+            unfiltered_list = glob.glob(temp_path)
 
-        unfiltered_list = list(set(unfiltered_list1) | set(unfiltered_list2))
         filtered_list = fnmatch.filter(unfiltered_list, "*.xml")
-        input_files = input_files + filtered_list
+        input_path.update(filtered_list)
 
-    return input_files, args.output[0]
+    return input_path, os.path.abspath(os.path.expandvars(os.path.expanduser(args.output[0])))
 
 
 if __name__ == "__main__":
-    (xml_filenames, output_filename) = parse_args()
-    main(xml_filenames, output_filename)
+    (input_paths, output_paths) = parse_args()
+    main(input_paths, output_paths)
