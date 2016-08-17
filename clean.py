@@ -1,4 +1,10 @@
 import sqlite3
+try:
+    from lxml.etree import ETCompatXMLParser
+
+    custom_parser = ETCompatXMLParser(huge_tree=True, recover=True)
+except ImportError:
+    custom_parser = None
 
 try:
     import xml.etree.cElementTree as XML
@@ -22,7 +28,7 @@ def main(xml_filenames, output_filename):
 
         for xml_filename in xml_filenames:
             log.debug("Parsing XML file: ")
-            tree = XML.parse(xml_filename)
+            tree = XML.parse(xml_filename, parser=custom_parser)
             log.debug("Done.")
             mms_list = mms_list + load_into_db(conn, tree)
 
@@ -136,7 +142,7 @@ def parse_args():
         filtered_list = fnmatch.filter(unfiltered_list, "*.xml")
         input_files = input_files + filtered_list
 
-    return input_files, args.output
+    return input_files, args.output[0]
 
 
 if __name__ == "__main__":
