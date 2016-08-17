@@ -60,7 +60,7 @@ def add_sms(conn, root):
     root.set("count", "%d" % sms_count[0])
     log.debug("Attempting to write new XML for SMS count: " + str(sms_count[0]))
     # Get the rows
-    cursor = conn.execute("SELECT * FROM messages")
+    cursor = conn.execute("SELECT * FROM messages ORDER BY date_sent")
     for row in cursor:
         # newfile.write("<sms protocol=\"%s\" body=\"%s\"/>\n" % (row[0], row[5]))
         sms_element = XML.SubElement(root, "sms")
