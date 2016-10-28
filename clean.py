@@ -50,7 +50,7 @@ def write_file(output_path, root):
 def append_mms(mms_list, root):
     log.debug("Adding skipped %d MMS into new XML..." % len(mms_list))
     for mms in mms_list:
-        root.append(mms)
+        root.extend(mms)
 
 
 def add_sms(conn, root):
