@@ -1,105 +1,147 @@
 import sqlite3
 try:
+    from lxml.etree import ETCompatXMLParser
+    custom_parser = ETCompatXMLParser(huge_tree=True, recover=True)
+except ImportError:
+    custom_parser = None
+
+try:
     import xml.etree.cElementTree as XML
 except ImportError:
     import xml.etree.ElementTree as XML
 import logging as log
 from datetime import datetime
-
-time_start = datetime.now()
-log.basicConfig(level=log.DEBUG, format='%(asctime)s %(message)s')
-log.debug('Starting Operation...')
-
-conn = sqlite3.connect('sms.db')
-
-####
-#
-# Parse the XML and filter out duplicates with date and target
-# 
-####
-log.debug("Parsing XML...")  
-tree = XML.parse('sms.xml')
-root = tree.getroot()
-log.debug("Done.")
-
-log.debug("Loading data into DB...")
-conn.execute('DELETE FROM messages')
-num_skipped = 0
-
-mms_list = []
-
-for child in root:
-	if child.tag == "mms":
-		log.debug("Skipping MMS element %s" % str(child))
-		mms_list.append(child)
-		num_skipped += 1
-		continue
-
-	columns = ', '.join(child.attrib.keys())
-	placeholders = ', '.join('?' * len(child.attrib))
-	sql = 'INSERT INTO messages ({}) VALUES ({})'.format(columns, placeholders)
-
-	try:
-		conn.execute(sql, child.attrib.values())
-	except sqlite3.IntegrityError as e:
-		# This is a duplicate error. Skip this sms entry. Filter this nosy dupe out!
-		#log.info("Skipping: Found IntegrityError when processing child: " + str(child))
-		#log.info("\tException: " + e.message)
-		num_skipped += 1
-		pass
-	except sqlite3.OperationalError as e:
-		log.info("Skipping: Found OperationalError when processing child (%s): %s" % (child.tag, str(child)))
-		log.info("\tException: " + e.message)
-		num_skipped += 1
-		pass
-
-root.clear() # Clear this super huge tree. We don't need it anymore
-log.debug("Done. Skipped entries: " + str(num_skipped))
-conn.commit()
+import argparse
+import glob, fnmatch, os
 
 
-####
-#
-# Write it back to file
-# 
-####
-log.debug("Rewriting into optimized XML...")
-newroot = XML.Element("smses")
+def main(input_paths, output_path):
+    try:
+        time_start = datetime.now()
+        log.basicConfig(level=log.DEBUG, format='%(asctime)s %(message)s')
+        log.debug('Starting Operation...')
+        conn = sqlite3.connect('sms.db')
+        conn.execute('DELETE FROM messages')
+        mms_list = []
+        root = XML.Element("smses")
 
-cursor = conn.execute("SELECT COUNT() FROM messages")
-smscount = cursor.fetchone()
-newroot.set("count", "%d" % smscount[0])
-log.debug("Attempting to write new XML for SMS count: " + str(smscount[0]))
+        for xml_filename in input_paths:
+            log.debug("Parsing XML file: ")
+            tree = XML.parse(xml_filename, parser=custom_parser)
+            log.debug("Done.")
+            mms_list = mms_list + load_into_db(conn, tree)
 
-# Get the rows
-cursor = conn.execute("SELECT * FROM messages")
-for row in cursor:
-	#newfile.write("<sms protocol=\"%s\" body=\"%s\"/>\n" % (row[0], row[5]))
-	smsElement = XML.SubElement(newroot, "sms")
-	smsElement.set("protocol", row[0])
-	smsElement.set("address", row[1])
-	smsElement.set("date", row[2])
-	smsElement.set("type", row[3])
-	smsElement.set("subject", row[4])
-	smsElement.set("body", row[5])
-	smsElement.set("toa", row[6])
-	smsElement.set("sc_toa", row[7])
-	smsElement.set("service_center", row[8])
-	smsElement.set("read", row[9])
-	smsElement.set("status", row[10])
-	smsElement.set("locked", row[11])
-	smsElement.set("date_sent", row[12])
-	smsElement.set("readable_date", row[13])
-	smsElement.set("contact_name", row[14])
+        add_sms(conn, root)
+        conn.close()
+        append_mms(mms_list, root)
+        write_file(output_path, root)
+        time_end = datetime.now()
+        log.debug('Operation completed in %d seconds.' % ((time_end - time_start).total_seconds()))
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
-# Append MMSes
-log.debug("Adding skipped %d MMS into new XML..." % len(mms_list))
-for mms in mms_list:
-	newroot.append(mms)
 
-newtree = XML.ElementTree(newroot)
-newtree.write("sms-new.xml", xml_declaration=True, encoding="UTF-8")
-time_end = datetime.now()
-log.debug('Operation completed in %d seconds.' % ((time_end - time_start).total_seconds()))
+def write_file(output_path, root):
+    tree = XML.ElementTree(root)
+    tree.write(output_path, xml_declaration=True, encoding="UTF-8")
 
-conn.close()
+
+def append_mms(mms_list, root):
+    log.debug("Adding skipped %d MMS into new XML..." % len(mms_list))
+    for mms in mms_list:
+        root.extend(mms)
+
+
+def add_sms(conn, root):
+    log.debug("Rewriting into optimized XML...")
+    cursor = conn.execute("SELECT COUNT() FROM messages")
+    sms_count = cursor.fetchone()
+    root.set("count", "%d" % sms_count[0])
+    log.debug("Attempting to write new XML for SMS count: " + str(sms_count[0]))
+    # Get the rows
+    cursor = conn.execute("SELECT * FROM messages ORDER BY date_sent")
+    for row in cursor:
+        # newfile.write("<sms protocol=\"%s\" body=\"%s\"/>\n" % (row[0], row[5]))
+        sms_element = XML.SubElement(root, "sms")
+        sms_element.set("protocol", row[0])
+        sms_element.set("address", row[1])
+        sms_element.set("date", row[2])
+        sms_element.set("type", row[3])
+        sms_element.set("subject", row[4])
+        sms_element.set("body", row[5])
+        sms_element.set("toa", row[6])
+        sms_element.set("sc_toa", row[7])
+        sms_element.set("service_center", row[8])
+        sms_element.set("read", row[9])
+        sms_element.set("status", row[10])
+        sms_element.set("locked", row[11])
+        sms_element.set("date_sent", row[12])
+        sms_element.set("readable_date", row[13])
+        sms_element.set("contact_name", row[14])
+    conn.commit()
+
+
+def load_into_db(conn, tree):
+    root = tree.getroot()
+    log.debug("Loading MMS data into DB...")
+    num_skipped = 0
+    mms_list = []
+    for child in root:
+        if child.tag == "mms":
+            log.debug("Skipping MMS element %s" % str(child))
+            mms_list.append(child)
+            num_skipped += 1
+            continue
+
+        columns = ', '.join(child.attrib.keys())
+        placeholders = ', '.join('?' * len(child.attrib))
+        sql = 'INSERT INTO messages ({}) VALUES ({})'.format(columns, placeholders)
+
+        try:
+            conn.execute(sql, child.attrib.values())
+        except sqlite3.IntegrityError:
+            # This is a duplicate error. Skip this sms entry. Filter this nosy dupe out!
+            # log.info("Skipping: Found IntegrityError when processing child: " + str(child))
+            # log.info("\tException: " + e.message)
+            num_skipped += 1
+            pass
+        except sqlite3.OperationalError as e:
+            log.info("Skipping: Found OperationalError when processing child (%s): %s" % (child.tag, str(child)))
+            log.info("\tException: " + e.message)
+            num_skipped += 1
+            pass
+    root.clear()  # Clear this super huge tree. We don't need it anymore
+    log.debug("Done skipping MMS. Skipped entries: " + str(num_skipped))
+    conn.commit()
+    return mms_list
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Combine XML files created with the program SMS Backup and restore.')
+    parser.add_argument('-i', '--input', metavar='infile', type=str, nargs='+',
+                        help='the input files to combine')
+    parser.add_argument('-o', '--output', metavar='outfile', type=str, nargs=1,
+                        help='the output file to write')
+
+    args = parser.parse_args()
+
+    input_path = set()
+
+    for current_path in args.input:
+        temp_path = os.path.abspath(os.path.expandvars(os.path.expanduser(current_path)))
+
+        if os.path.isdir(temp_path):
+            unfiltered_list = [os.path.normpath(os.path.join(temp_path, x)) for x in os.listdir(temp_path)]
+        else:
+            unfiltered_list = glob.glob(temp_path)
+
+        filtered_list = fnmatch.filter(unfiltered_list, "*.xml")
+        input_path.update(filtered_list)
+
+    return input_path, os.path.abspath(os.path.expandvars(os.path.expanduser(args.output[0])))
+
+
+if __name__ == "__main__":
+    (input_paths, output_paths) = parse_args()
+    main(input_paths, output_paths)
