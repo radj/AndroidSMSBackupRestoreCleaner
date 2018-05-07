@@ -1,6 +1,24 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <?xml-stylesheet type="text/xsl" href="sms.xsl"?>
-<smses count="2">
+<smses count="4">
   <sms protocol="0" address="09001234567" date="1365481757533" type="2" subject="null" body="Hey! :) What you doing?" toa="null" sc_toa="null" service_center="null" read="1" status="32" locked="0" date_sent="0" readable_date="2013/04/09 12:29:17" contact_name="Cute Chic" />
   <sms protocol="0" address="09001234567" date="1365481757533" type="2" subject="null" body="Hey! :) What you doing?" toa="null" sc_toa="null" service_center="null" read="1" status="32" locked="0" date_sent="0" readable_date="2013/04/09 12:29:17" contact_name="Cute Chic" />
+  <mms text_only="0" ct_t="application/vnd.wap.multipart.related" using_mode="0" msg_box="1" secret_mode="0" v="18" retr_txt_cs="null" ct_cls="null" favorite="0" d_rpt_st="0" deletable="0" st="null" sim_imsi="null" creator="com.samsung.android.scloud" tr_id="Txtr3710" sim_slot="0" read="1" m_id="http://vm2.bytel.fr/mmsc/?AB8_uCZQFi" callback_set="0" m_type="132" retr_txt="null" locked="0" resp_txt="null" rr_st="0" safe_message="0" retr_st="null" reserved="0" msg_id="0" hidden="0" sub="null" rr="129" seen="1" ct_l="null" from_address="null" m_size="null" exp="null" sub_cs="null" sub_id="1" resp_st="null" date="1477919906000" app_id="0" date_sent="1477919905" pri="129" address="+339001234567" read_status="null" d_tm="null" d_rpt="129" device_name="null" spam_report="0" rpt_a="null" m_cls="personal" readable_date="31 oct. 2016 14:18:26" contact_name="MMA">
+    <parts>
+      <part seq="0" ct="text/plain" name="part-0" chset="106" cd="null" fn="null" cid="null" cl="null" ctt_s="null" ctt_t="null" text='Bah en gros "bonjour je voudrais prendre rdv" "oui c&apos;est pour quel sujet, c&apos;est quoi le probleme" je lui explique, elle m&apos;a dit qu&apos;au vu de nos déclarations on avait le droit à 21€ de prime d&apos;activité à 2, que c&apos;est ce qu&apos;on avait touché, je lui ai dit que non, qu&apos;on avait droit à 80€ en septembre, elle m&apos;a dit que les estimations sont pas bonnes, je lui dit que c&apos;est pas une estimation, c&apos;est ce qu&apos;on a reçu vraiment "ah bon ah OK bah ils ont revu vos droits alors" OK mais pq ? "ah bah ça moi je peux pas vous donner plus d&apos;informations hein" BAH C&apos;EST POUR ÇA QUE JE VEUX PRENDRE RDV !!! U_u "je peux vous faire rappeler par un conseiller qui aura étudier votre problème sous 48h" non putain je veux un rdv ! Bref voilà :(' />
+    </parts>
+    <addrs>
+      <addr address="+339001234567" type="137" charset="106" />
+      <addr address="+339001234567" type="151" charset="106" />
+    </addrs>
+  </mms>
+    <mms text_only="0" ct_t="application/vnd.wap.multipart.related" using_mode="0" msg_box="1" secret_mode="0" v="18" retr_txt_cs="null" ct_cls="null" favorite="0" d_rpt_st="0" deletable="0" st="null" sim_imsi="null" creator="com.samsung.android.scloud" tr_id="Txtr3710" sim_slot="0" read="1" m_id="http://vm2.bytel.fr/mmsc/?AB8_uCZQFi" callback_set="0" m_type="132" retr_txt="null" locked="0" resp_txt="null" rr_st="0" safe_message="0" retr_st="null" reserved="0" msg_id="0" hidden="0" sub="null" rr="129" seen="1" ct_l="null" from_address="null" m_size="null" exp="null" sub_cs="null" sub_id="1" resp_st="null" date="1477919906000" app_id="0" date_sent="1477919905" pri="129" address="+339001234567" read_status="null" d_tm="null" d_rpt="129" device_name="null" spam_report="0" rpt_a="null" m_cls="personal" readable_date="31 oct. 2016 14:18:26" contact_name="MMA">
+        <parts>
+            <part seq="0" ct="text/plain" name="part-0" chset="106" cd="null" fn="null" cid="null" cl="null" ctt_s="null" ctt_t="null" text='Bah en gros "bonjour je voudrais prendre rdv" "oui c&apos;est pour quel sujet, c&apos;est quoi le probleme" je lui explique, elle m&apos;a dit qu&apos;au vu de nos déclarations on avait le droit à 21€ de prime d&apos;activité à 2, que c&apos;est ce qu&apos;on avait touché, je lui ai dit que non, qu&apos;on avait droit à 80€ en septembre, elle m&apos;a dit que les estimations sont pas bonnes, je lui dit que c&apos;est pas une estimation, c&apos;est ce qu&apos;on a reçu vraiment "ah bon ah OK bah ils ont revu vos droits alors" OK mais pq ? "ah bah ça moi je peux pas vous donner plus d&apos;informations hein" BAH C&apos;EST POUR ÇA QUE JE VEUX PRENDRE RDV !!! U_u "je peux vous faire rappeler par un conseiller qui aura étudier votre problème sous 48h" non putain je veux un rdv ! Bref voilà :(' />
+        </parts>
+        <addrs>
+            <addr address="+339001234567" type="137" charset="106" />
+            <addr address="+339001234567" type="151" charset="106" />
+        </addrs>
+    </mms>
 </smses>
